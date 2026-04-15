@@ -50,14 +50,49 @@ Created directory structure and saved this session log as a markdown file for fu
 
 ---
 
+## Request 3: README Enhancement - 4 Updates
+
+### User Input
+> I need you to update my readme with these 4 changes:
+> 1. Add a section at the top: AI Driven management - this repo's backlog is built and maintained by custom langraph agent which can be found in scripts/ folder.
+> 2. AI interaction logs are saved in docs/ai-interaction-logs folder and it shows my interactions with AI to develop this.
+> 3. Add a dependency mapping in a planning section, we will use GitHub's tracked by and blocks to manage critical path.
+> 4. Add MIT license
+
+### Response
+
+Updated README.md with all four requested enhancements:
+
+✅ **AI-Driven Management Section** – New section after Project Vision explaining the custom LangGraph agent in `scripts/` folder that manages backlog and prioritization
+
+✅ **AI Interaction Logs Reference** – Added link in AI Automation Tools section directing to `docs/ai-interaction-logs/` folder with explanation
+
+✅ **Planning & Dependency Management Section** – New section documenting:
+  - GitHub's "tracked by" and "blocks" relationship features
+  - Three key benefits: visibility, automatic blocking, data-driven prioritization
+  - Link to GitHub Issues for live dependency mapping
+
+✅ **MIT License** – Replaced placeholder with full MIT license terms:
+  - Permissions: commercial use, distribution, modification, private use
+  - Conditions: license and copyright notice inclusion
+  - Limitations: no liability or warranty
+
+**Changes Made:**
+- Added 2 new sections: "AI-Driven Management" and "Planning & Dependency Management"
+- Enhanced "AI Automation Tools" with interaction logs link
+- Updated License section with MIT license details
+
+---
+
 ## Session Summary
 
-**Objectives Completed:** 2/2 ✅
+**Objectives Completed:** 3/3 ✅
 
 | Task | Status | Deliverable |
 |------|--------|------------|
 | Draft professional README | ✅ Complete | README.md |
 | Document interaction log | ✅ Complete | 2026-04-15-readme-creation.md |
+| README enhancements (4 updates) | ✅ Complete | README.md (updated) |
 
 **Key Decisions Made:**
 - Used table format for tech stack for clarity and professional appearance

@@ -17,6 +17,12 @@ By combining cutting-edge language models with deterministic workflow engines, w
 
 ---
 
+## 🤖 AI-Driven Management
+
+This repository's backlog and feature prioritization is built and maintained by a custom LangGraph agent designed to optimize task planning and dependencies. You can find the agent scripts in the [scripts/](./scripts/) folder. This approach ensures our roadmap is continuously refined based on architectural dependencies and delivery priorities.
+
+---
+
 ## 🛠 Core Tech Stack
 
 | Component | Technology | Purpose |
@@ -63,10 +69,27 @@ This quarter, we are shipping **Infrastructure Agent v1.0**—a production-ready
 - **[LangGraph Workflows](./docs/LANGGRAPH_GUIDE.md)** – Building deterministic multi-step agent workflows
 - **[Gemini API Integration](./docs/GEMINI_INTEGRATION.md)** – Prompt engineering and model configuration
 - **[Custom Tools & Actions](./docs/CUSTOM_TOOLS.md)** – Extending agent capabilities with infrastructure integrations
+- **[AI Interaction Logs](./docs/ai-interaction-logs/)** – Historical record of AI-assisted development and design decisions
 
 ---
 
-## 📁 Repository Structure
+## � Planning & Dependency Management
+
+We use GitHub's **tracked by** and **blocks** relationship features to manage critical path dependencies:
+
+- **Tracked by**: Issues that are blocked by other work
+- **Blocks**: Issues that must be completed before dependent work can proceed
+
+This creates a transparent dependency graph visible in GitHub Issues, ensuring:
+- ✅ Clear visibility into critical path items
+- ✅ Automatic blocking of dependent tasks
+- ✅ Data-driven prioritization informed by AI analysis
+
+See [GitHub Issues](../../issues) for dependency mapping and current blockers.
+
+---
+
+## �📁 Repository Structure
 
 ```
 em-assignment/
@@ -109,9 +132,9 @@ Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
 ## 📋 Current Status
 
-**Phase:** Q1 2026 – Infrastructure Agent v1.0 Development  
+**Phase:** Q2 2026 – Infrastructure Agent v1.0 Development  
 **Status:** In Progress  
-**Target Release:** End of Q1 2026
+**Target Release:** End of Q2 2026
 
 For current sprint updates, see [GitHub Project Board](../../projects).
 
@@ -127,7 +150,11 @@ For current sprint updates, see [GitHub Project Board](../../projects).
 
 ## 📄 License
 
-[Add your license information here]
+This project is licensed under the **MIT License** – see the [LICENSE](./LICENSE) file for details.
+
+Permissions: commercial use, distribution, modification, and private use.  
+Conditions: include license and copyright notices.  
+Limitations: no liability or warranty.
 
 ---
 

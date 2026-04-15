@@ -101,6 +101,50 @@ We declare success when:
 
 ---
 
+## 👨‍💻 Developer Experience
+
+We believe great developer experience is a competitive advantage. Here's how we make the team's life exceptional:
+
+### 🤖 Automated Ticket Creation & Dependency Mapping
+The **LangGraph Backlog Manager Agent** eliminates manual issue creation and dependency management. Instead of tedious GitHub issue templating and manual link tracking, the agent:
+- **Generates well-structured tickets** with clear context, acceptance criteria, and technical requirements
+- **Automatically maps dependencies** using GitHub's `tracked by` and `blocks` relationships
+- **Prioritizes intelligently** based on architectural impact and delivery sequencing
+- **Stays in sync** as architecture evolves—no stale dependency graphs
+
+Engineers focus on building; the agent handles the busywork.
+
+### 🔍 Time-Travel Debugging with LangSmith & State Checkpoints
+When an agent fails, we don't guess—we *see*:
+- **Full execution tracing** in LangSmith shows every LLM call, tool invocation, and state mutation
+- **State checkpoints** capture workflow state at each step, enabling you to:
+  - Rewind to any point in execution
+  - Inspect variable values mid-workflow
+  - Replay from a checkpoint without starting over
+  - Validate conditional logic with complete context
+
+This transforms debugging from "blindly adding print statements" to "surgical precision inspection."
+
+### ⚡ Circuit Breaker Pattern = No On-Call Fatigue
+**Failing fast prevents cascading disasters:**
+- When an infrastructure API is slow or broken, the circuit breaker **fails immediately** instead of hanging
+- Agents gracefully degrade and report errors in seconds, not minutes
+- No alert storms from cascading timeouts
+- On-call engineers get actionable, scoped errors—not mystery hangs
+
+The pattern is baked into our tool execution layer, protecting both agents and the infrastructure they manage.
+
+### 🚀 Redis Streams: Parallel Without Blocking
+Engineers build **independently**:
+- **Workers and orchestrators decouple completely** via Redis Streams—no shared locks, no race conditions
+- Multiple teams can own workflow stages without coordination overhead
+- Backpressure is natural; stream consumers auto-scale based on queue depth
+- No "I'm blocked waiting for the storage team" moments
+
+Build your workflow components in parallel; they integrate through decoupled events.
+
+---
+
 ### 💡 Key Tradeoff Decisions
 
 **Decision 1: Single-Tenant First**  

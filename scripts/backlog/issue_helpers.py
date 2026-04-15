@@ -56,13 +56,15 @@ def categorize_issue_to_milestone(title: str) -> str:
     return "foundation"
 
 
-def get_sprint_labels(milestone_key: str) -> list[str]:
+def get_sprint_labels(milestone_key: str, issue_index: int = None) -> list[str]:
     """
     Get sprint label for an issue based on milestone.
     Returns: list with single sprint label (alternates within milestone)
     Foundation (Sprint 1-2) → rotates between "Sprint 1" and "Sprint 2"
     Chatbot (Sprint 3-4) → rotates between "Sprint 3" and "Sprint 4"
     Workflows (Sprint 5-6) → rotates between "Sprint 5" and "Sprint 6"
+    
+    If issue_index is provided, uses it to distribute evenly (for granular sprint assignment).
     """
     sprint_map = {
         "foundation": ["Sprint 1", "Sprint 2"],
@@ -70,5 +72,10 @@ def get_sprint_labels(milestone_key: str) -> list[str]:
         "workflows": ["Sprint 5", "Sprint 6"],
     }
     sprints = sprint_map.get(milestone_key, ["Sprint 1"])
-    # Return single sprint (randomly chosen from the pair for this milestone)
+    
+    # If index is provided, use it for even distribution (e.g., even indices → Sprint 1, odd → Sprint 2)
+    if issue_index is not None:
+        return [sprints[issue_index % len(sprints)]]
+    
+    # Otherwise, randomly choose (backward compatibility)
     return [random.choice(sprints)]

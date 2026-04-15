@@ -73,19 +73,29 @@ def architect_node(state: BacklogState) -> BacklogState:
     prompt = ChatPromptTemplate.from_template(
         """You are a technical architect analyzing system design documentation.
 
-Based on the following architecture documentation, generate 12-15 GitHub issues that cover:
-1. Core infrastructure setup (FastAPI gateway, LangGraph orchestrator, workers)
-2. Redis Streams implementation
-3. Circuit breaker implementation
-4. PostgreSQL persistence layer
-5. LangSmith integration
-6. Kubernetes deployment configurations
+Based on the following architecture documentation, generate 30 GRANULAR GitHub issues that cover:
+
+**Sprint 1-2 Foundation (15 issues for foundation milestone)**:
+1. FastAPI gateway setup and configuration (3-4 granular issues)
+2. Redis Streams implementation and consumer groups (3-4 granular issues)  
+3. Circuit breaker pattern implementation (2-3 granular issues)
+4. PostgreSQL persistence setup (2-3 granular issues)
+
+**Sprint 3-4 Chatbot (8 issues for chatbot milestone)**:
+5. LangGraph orchestrator setup (2-3 granular issues)
+6. Gemini API integration (2-3 granular issues)
+7. LangSmith integration and observability (2-3 granular issues)
+
+**Sprint 5-6 Workflows (7 issues for workflows milestone)**:
+8. Idempotency layer implementation (2-3 granular issues)
+9. Recovery and error handling (2-3 granular issues)
+10. State persistence mechanisms (1-2 granular issues)
 
 For EACH issue, provide:
-- A concise title (50-70 chars)
+- A concise, granular title (50-70 chars) describing a single small task
 - A detailed body as a single markdown string with:
   - User Story section (As a..., I want..., So that...)
-  - Acceptance Criteria section (numbered checklist)
+  - Acceptance Criteria section (numbered checklist, 2-4 items max for granularity)
   - Technical notes section (architecture references, key dependencies)
 - A dependencies list: titles of other issues this one depends on (empty list if no dependencies)
 
@@ -93,10 +103,13 @@ Format as a JSON array of objects with exactly these keys: "title", "body", "dep
 The body MUST be a single string containing markdown, NOT nested objects.
 Dependencies should be a list of issue titles, e.g., ["Deploy Redis StatefulSet", "Configure Kubernetes"]
 
+Break down tasks into small, assignable units (6-8 hour estimates each).
+Ensure first 15-16 issues can be split between Sprint 1 and Sprint 2 (8 each).
+
 ARCHITECTURE DOCS:
 {docs}
 
-Generate the issues now with proper dependencies and plain text body:"""
+Generate the 30 granular issues now with proper dependencies and plain text body:"""
     )
 
     # Create chain and invoke
@@ -196,17 +209,19 @@ def refiner_node(state: BacklogState) -> BacklogState:
 1. Redis Streams (async task distribution, consumer groups, exactly-once delivery)
 2. Circuit Breaker patterns (CLOSED/OPEN/HALF_OPEN states, failure thresholds)
 
-For EACH issue, ensure:
-- Technical accuracy regarding Redis Streams or Circuit Breaker usage
-- Clear acceptance criteria that test these specific mechanisms
+For EACH of the 30 granular issues, ensure:
+- Technical accuracy regarding Redis Streams or Circuit Breaker usage (if applicable)
+- Clear acceptance criteria that test specific mechanisms (2-4 items, focused and actionable)
 - Proper sequencing (e.g., Circuit Breaker issues should reference Redis task handling)
 - Dependencies are valid issue titles that exist in the list (or empty if no deps)
 - Body is a single markdown string, NOT nested objects
+- Issues are granular and assignable - each focusing on one specific task
 
 If an issue is unclear or missing these references, enhance it.
 If dependencies reference non-existent issues, update them to actual issue titles in the list.
 Convert any nested structure (user_story, acceptance_criteria, technical_notes) into a single markdown body string.
 Keep the JSON format: array of objects with "title", "body", and "dependencies" keys ONLY.
+Maintain the organization into Foundation (Sprint 1-2), Chatbot (Sprint 3-4), and Workflows (Sprint 5-6) themes.
 
 DRAFT ISSUES:
 {issues}
@@ -344,6 +359,9 @@ def publisher_node(state: BacklogState) -> BacklogState:
     published_numbers = []
     skipped_numbers = []
     temp_body_file = Path(__file__).parent / "temp_body.md"
+    
+    # Track issue counts per milestone for proper sprint distribution
+    milestone_issue_counts = {"foundation": 0, "chatbot": 0, "workflows": 0}
 
     for i, issue in enumerate(state["refined_issues"], 1):
         title = issue.get("title", "")
@@ -378,7 +396,12 @@ def publisher_node(state: BacklogState) -> BacklogState:
             # Determine milestone based on issue title
             milestone_key = categorize_issue_to_milestone(title)
             milestone_title = milestones_map.get(milestone_key, "")
-            sprint_labels = get_sprint_labels(milestone_key)
+            
+            # Use issue index within milestone for even sprint distribution
+            issue_index_in_milestone = milestone_issue_counts.get(milestone_key, 0)
+            milestone_issue_counts[milestone_key] = issue_index_in_milestone + 1
+            
+            sprint_labels = get_sprint_labels(milestone_key, issue_index_in_milestone)
             
             # Add epic reference to body
             full_body = body
@@ -466,5 +489,9 @@ def publisher_node(state: BacklogState) -> BacklogState:
     print(f"✅ Created {len(published_numbers)} Story issues")
     print(f"⏭️  Skipped {len(skipped_numbers)} existing issues (idempotent)")
     print(f"📊 Total story issues involved: {len(published_numbers) + len(skipped_numbers)}")
+    print(f"\n📊 Issues per milestone/sprint:")
+    print(f"   Foundation (Sprint 1-2): {milestone_issue_counts['foundation']} issues (~{milestone_issue_counts['foundation']//2} each sprint)")
+    print(f"   Chatbot (Sprint 3-4): {milestone_issue_counts['chatbot']} issues (~{milestone_issue_counts['chatbot']//2} each sprint)")
+    print(f"   Workflows (Sprint 5-6): {milestone_issue_counts['workflows']} issues (~{milestone_issue_counts['workflows']//2} each sprint)")
 
     return state

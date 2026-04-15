@@ -127,25 +127,21 @@ We declare success when:
 
 ## �📚 Navigation Guide
 
-### Getting Started
-- **[Quick Start Guide](./docs/QUICKSTART.md)** – Set up the development environment and run your first agent
-- **[Architecture Overview](./docs/ARCHITECTURE.md)** – Deep dive into platform design, agent lifecycle, and system interactions
+### Architecture & Design
+- **[01 System Overview](./docs/architecture/01-overview.md)** – Core principles, system design, and key components
 
 ### Planning & Backlog
-- **[GitHub Issues](../../issues)** – Feature requests, bug reports, and sprint planning
-- **[Project Board](../../projects)** – Current sprint status and task assignments
+- **[02 C4 Diagrams](./docs/architecture/02-c4-diagrams.md)** – Level 1-3 architecture diagrams
+- **[03 Components](./docs/architecture/03-components.md)** – Component descriptions
+- **[04 Async Communication](./docs/architecture/04-async-communication.md)** – Redis Streams patterns
+- **[05 State Persistence](./docs/architecture/05-state-persistence.md)** – Two-tier persistence
+- **[06 Idempotency](./docs/architecture/06-idempotency.md)** – Request deduplication
+- **[07 Circuit Breaker](./docs/architecture/07-circuit-breaker.md)** – Tool resilience patterns
+- **[08 Deployment](./docs/architecture/08-deployment.md)** – Kubernetes deployment
 
-### Key Resources
-- **[API Documentation](./docs/API.md)** – REST API endpoints and integration examples
-- **[Agent Development Guide](./docs/AGENT_DEVELOPMENT.md)** – Building custom agents and workflows
-- **[Deployment Guide](./docs/DEPLOYMENT.md)** – Kubernetes configuration and production best practices
-- **[LangSmith Integration](./docs/OBSERVABILITY.md)** – Monitoring, debugging, and performance optimization
-
-### AI Automation Tools
-- **[LangGraph Workflows](./docs/LANGGRAPH_GUIDE.md)** – Building deterministic multi-step agent workflows
-- **[Gemini API Integration](./docs/GEMINI_INTEGRATION.md)** – Prompt engineering and model configuration
-- **[Custom Tools & Actions](./docs/CUSTOM_TOOLS.md)** – Extending agent capabilities with infrastructure integrations
-- **[AI Interaction Logs](./docs/ai-interaction-logs/)** – Historical record of AI-assisted development and design decisions
+### AI Automation & Tooling
+- **[Backlog Manager Agent](./scripts/README.md)** – LangGraph agent for GitHub issue generation
+- **[AI Interaction Logs](./docs/ai-interaction-logs/)** – AI-assisted development conversations
 
 ---
 
@@ -169,50 +165,71 @@ See [GitHub Issues](../../issues) for dependency mapping and current blockers.
 
 ```
 em-assignment/
-├── README.md                 # This file
-├── docs/                     # Documentation
-│   ├── QUICKSTART.md         # Getting started guide
-│   ├── ARCHITECTURE.md       # System design and architecture
-│   ├── API.md                # API reference
-│   ├── DEPLOYMENT.md         # Production deployment guide
-│   └── ...                   # Additional guides
-├── src/
-│   ├── agents/               # Agent implementations
-│   ├── workflows/            # LangGraph workflow definitions
-│   ├── api/                  # FastAPI application
-│   ├── integrations/         # Infrastructure API integrations
-│   └── config/               # Configuration management
-├── tests/                    # Unit and integration tests
-├── k8s/                      # Kubernetes manifests
-├── requirements.txt          # Python dependencies
-└── Dockerfile               # Container image build
-
-
+├── README.md                           # This file (project overview & strategic planning)
+├── docs/
+│   ├── architecture/                   # System design documentation
+│   │   ├── 01-overview.md              # System overview and design goals
+│   │   ├── 02-c4-diagrams.md           # Level 1-3 architecture diagrams
+│   │   ├── 03-components.md            # Detailed component descriptions
+│   │   ├── 04-async-communication.md   # Redis Streams patterns
+│   │   ├── 05-state-persistence.md     # Two-tier persistence design
+│   │   ├── 06-idempotency.md           # Request deduplication
+│   │   ├── 07-circuit-breaker.md       # Tool resilience patterns
+│   │   ├── 08-deployment.md            # Kubernetes deployment guide
+│   │   └── README.md                   # Architecture docs index
+│   └── ai-interaction-logs/            # AI-assisted development conversations
+│       ├── 2026-04-15-backlog-manager-agent.md
+│       ├── 2026-04-15-backlog-manager-fixes.md
+│       ├── 2026-04-15-backlog-manager-refinement.md
+│       ├── 2026-04-15-backlog-modularization.md
+│       ├── 2026-04-15-readme-creation.md
+│       ├── 2026-04-15-system-design-architecture.md
+│       └── 2026-04-15-strategic-tradeoffs.md
+├── scripts/
+│   ├── backlog_manager.py               # LangGraph agent for backlog management
+│   ├── requirements-backlog-manager.txt # Agent dependencies
+│   ├── README.md                        # Backlog manager documentation
+│   └── backlog/                         # Agent modules
+│       ├── __init__.py
+│       ├── state.py
+│       ├── workflow.py
+│       ├── llm_nodes.py
+│       ├── document_loader.py
+│       ├── issue_helpers.py
+│       └── github_operations.py
+└── .gitignore                           # Git ignore rules
 ```
 
 ---
 
 ## 🤝 Contributing
 
-We follow a structured development process:
+This is a released version. For future contributions, follow these guidelines:
 
-1. **Create an issue** on GitHub to discuss your idea
-2. **Create a branch** from `main` for your feature
-3. **Write tests** for new functionality
-4. **Submit a pull request** with a clear description
-5. **Code review** by team members before merge
+1. **Create a GitHub issue** to discuss your proposal
+2. **Create a feature branch** from `main`
+3. **Update architecture documentation** if design changes
+4. **Submit a pull request** with clear description and reasoning
+5. **Code review** required before merge to `main`
 
-Please refer to [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+All changes should align with the [Strategic Tradeoffs](#-q2-strategic-tradeoffs--team-capacity-planning) principles and architectural patterns in [docs/architecture/](./docs/architecture/).
 
 ---
 
 ## 📋 Current Status
 
-**Phase:** Q2 2026 – Infrastructure Agent v1.0 Development  
-**Status:** In Progress  
-**Target Release:** End of Q2 2026
+**Phase:** Q2 2026 – Infrastructure Agent v1.0  
+**Status:** ✅ Complete & Ready for Production  
+**Release Date:** April 15, 2026
 
-For current sprint updates, see [GitHub Project Board](../../projects).
+All core components documented and architected. Ready for implementation phase (Q2/Q3 2026).
+
+**Deliverables:**
+- ✅ Complete system architecture with C4 diagrams
+- ✅ Strategic capacity planning and feature prioritization
+- ✅ Detailed deployment and operations guide
+- ✅ AI-assisted design documentation with complete conversation logs
+- ✅ Automated backlog management agent (LangGraph + Gemini)
 
 ---
 

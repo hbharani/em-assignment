@@ -49,7 +49,83 @@ This quarter, we are shipping **Infrastructure Agent v1.0**—a production-ready
 
 ---
 
-## 📚 Navigation Guide
+## � Q2 Strategic Tradeoffs – Team Capacity Planning
+
+With a team of 5 engineers and ~100 effective engineering weeks this quarter, we prioritize ruthlessly:
+
+### ✅ THIS QUARTER (v1.0 MVP – Production Ready)
+**Focused on reliability, observability, and core infrastructure automation**
+
+| Feature | Effort | Why Now |
+|---------|--------|---------|
+| **Core Agent Execution Engine** | High | Foundation for everything; LangGraph + Gemini integration |
+| **Single-Step & Multi-Step Workflows** | High | Core premise of the platform; agents must execute tasks |
+| **Infrastructure Querying** | Medium | Read-only operations; lower risk, immediate value |
+| **Basic API Integration** | Medium | Support ~5-10 critical infrastructure APIs |
+| **State Persistence (Redis + PostgreSQL)** | High | Non-negotiable for production reliability |
+| **Circuit Breaker Pattern** | Medium | Prevents cascading failures; operational essential |
+| **LangSmith Observability** | Medium | Required for debugging agent behavior in prod |
+| **Kubernetes Deployment** | High | Target deployment environment; must be battle-tested |
+| **Comprehensive Testing** | High | Production requires >80% coverage + integration tests |
+| **Operational Documentation** | Medium | Runbook for SREs + deployment guide |
+
+**Estimated allocation:** ~90 engineering weeks
+
+---
+
+### ⏸️ NEXT QUARTER (v1.1 – Enterprise Grade)
+**Deferred to focus on throughput and polish this quarter**
+
+| Feature | Why Deferred | Q3 Effort |
+|---------|--------------|-----------|
+| **Multi-Agent Orchestration** | Requires stable v1.0 foundation first | High |
+| **Advanced Workflow Patterns** | Scope creep; defer edge cases | High |
+| **Commercial API Integrations** | Nice-to-have; focus on core infra APIs | Medium |
+| **UI/Dashboard** | Can use CLI/logs for v1.0; UI can follow | High |
+| **Advanced Security (RBAC, Encryption)** | v1.0 assumes trusted environment | Medium |
+| **Custom LLM Model Fine-tuning** | Requires production baselines first | High |
+| **Performance Optimization (sub-s latency)** | Defer until we measure real workloads | Medium |
+| **Disaster Recovery Playbooks** | Can document after v1.0 runs | Low |
+
+**Estimated allocation (Q3):** These features will define v1.1
+
+---
+
+### 🎯 Success Criteria for v1.0
+We declare success when:
+1. ✅ Agents reliably execute 95%+ of tasks without human intervention
+2. ✅ All workflow state survives pod crashes (Redis + PostgreSQL dual-layer persistence)
+3. ✅ Operations team can deploy, scale, and monitor using K8s manifests
+4. ✅ LangSmith dashboards show full request tracing from user → LLM → tool
+5. ✅ Documentation covers deployment, troubleshooting, and extending agents
+
+---
+
+### 💡 Key Tradeoff Decisions
+
+**Decision 1: Single-Tenant First**  
+- **Choice:** v1.0 ships as single cluster, single tenant
+- **Reason:** Multi-tenancy adds ~15% engineering overhead this quarter; defer to v1.1
+- **Impact:** Simplifies secrets management, observability, and compliance for Q2
+
+**Decision 2: CLI + Logs > UI**  
+- **Choice:** No web dashboard in v1.0; engineers use CLI + LangSmith UI
+- **Reason:** UI adds 1-2 weeks; CLI is sufficient for launch; UI is v1.1 Phase 2
+- **Impact:** Faster time-to-market; dashboard can roll out independently
+
+**Decision 3: Infrastructure APIs (not Business Logic)**  
+- **Choice:** Focus on infra (compute, storage, networking); defer HR/billing APIs
+- **Reason:** Infrastructure is higher ROI; business logic APIs are nice-to-have
+- **Impact:** v1.0 is laser-focused on DevOps use cases
+
+**Decision 4: Synchronous Workflows Only**  
+- **Choice:** No deeply nested async branching; linear + simple branching only
+- **Reason:** Complex workflows require more robust state tracking; save for v1.1
+- **Impact:** Most real-world infra tasks are linear anyway; covers 80% of use cases
+
+---
+
+## �📚 Navigation Guide
 
 ### Getting Started
 - **[Quick Start Guide](./docs/QUICKSTART.md)** – Set up the development environment and run your first agent

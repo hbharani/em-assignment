@@ -4,7 +4,7 @@ Scripts for automating various tasks related to the em-assignment project.
 
 ## backlog_manager.py
 
-A LangGraph agent that generates GitHub issues from architecture documentation using Google Gemini.
+A LangGraph agent that generates GitHub issues from architecture documentation using Google Gemini, with automatic project management and idempotent issue creation.
 
 ### What it does
 
@@ -21,7 +21,36 @@ A LangGraph agent that generates GitHub issues from architecture documentation u
    - Circuit Breaker patterns (CLOSED/OPEN/HALF_OPEN states)
    - Clear acceptance criteria
 
-3. **Publisher Node**: Uses the `gh` CLI to create issues on GitHub
+3. **Publisher Node**: Uses the `gh` CLI to:
+   - **Create or find** a GitHub project (`em-assignment Backlog`)
+   - **Check for existing issues** by title (idempotent - won't create duplicates)
+   - **Create new issues** only if they don't already exist
+   - **Add all issues** (new and existing) to the GitHub project
+   - Track created vs. skipped issues
+
+### Idempotency
+
+The agent is **fully idempotent**:
+- Before creating an issue, it queries GitHub to check if an issue with the same title already exists
+- If found, it skips creation and adds the existing issue to the project
+- Status: `⏭️ Issue already exists (idempotent): #42 - Issue Title`
+- Multiple runs won't duplicate issues
+
+### GitHub Project Management
+
+The script automatically:
+- Creates a new GitHub project named `em-assignment Backlog` (if it doesn't exist)
+- Adds all generated/existing issues to this project
+- Provides clear feedback on project creation and issue assignment
+
+Example output:
+```
+✅ Found existing project: #1 (em-assignment Backlog)
+✅ Created issue #15: Some Feature
+  📌 Added to project: #15
+⏭️  Issue already exists (idempotent): #14 - Another Feature
+  📌 Added to project: #14
+```
 
 ### Requirements
 
@@ -35,8 +64,11 @@ pip install langgraph langchain langchain_google_genai pydantic
 # Set your Google Gemini API key
 export GOOGLE_API_KEY="your-api-key-here"
 
-# Authenticate with GitHub (for gh CLI)
+# Authenticate with GitHub (for gh CLI and project access)
 gh auth login
+
+# Verify gh CLI is installed
+gh --version
 ```
 
 ### Usage
@@ -46,7 +78,7 @@ gh auth login
 python scripts/backlog_manager.py --dry-run
 ```
 
-**Auto-publish to GitHub:**
+**Auto-publish to GitHub and create project:**
 ```bash
 python scripts/backlog_manager.py
 ```
@@ -57,22 +89,34 @@ The script automatically loads:
 
 ### Output
 
-The script outputs a summary with:
+The script outputs a comprehensive summary with:
 - Number of draft, refined, and published issues
+- Number of skipped issues (idempotent)
 - GitHub issue numbers created
+- GitHub project information
 - Any errors encountered
 
 Example:
 ```
 ================================================================================
-📊 WORKFLOW SUMMARY
-================================================================================
-📄 Docs loaded: 8
-📝 Draft issues: 14
-✨ Refined issues: 14
-✅ Published issues: 14
+🏗️  THE ARCHITECT: Reading docs and drafting issues...
+✅ Generated 14 draft issues
 
-🎉 Issue Numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+🔧 THE REFINER: Validating Redis Streams and Circuit Breaker references...
+✅ Refined 14 issues
+
+📤 THE PUBLISHER: Managing GitHub issues and project...
+✅ Found existing project: #1 (em-assignment Backlog)
+
+✅ Created issue #15: Implement FastAPI Gateway
+  📌 Added to project: #15
+
+⏭️  Issue already exists (idempotent): #14 - Develop LangGraph Orchestrator
+  📌 Added to project: #14
+
+✅ Created 1 new issues
+⏭️  Skipped 13 existing issues (idempotent)
+📊 Total issues involved: 14
 ================================================================================
 ```
 
@@ -80,19 +124,21 @@ Example:
 
 ```
 BacklogState
-├── docs_content: dict[filename -> content]
+├── docs_content: dict[filename → content]
 ├── draft_issues: list[dict with title, body]
 ├── refined_issues: list[dict with title, body]
-├── published_issue_numbers: list[int]
+├── published_issue_numbers: list[int] (new issues created)
 └── errors: list[str]
 
-Flow: Architect -> Refiner -> Publisher
+Flow: Architect → Refiner → Publisher
 ```
 
 ### Key Features
 
-- **Linear Graph**: Architect → Refiner → Publisher (no branches)
-- **Error Tracking**: Collects all errors in state for review
-- **Partial Success**: Continues if some issues fail (doesn't crash entire workflow)
-- **JSON Parsing**: Handles Gemini responses with markdown code blocks
-- **Subprocess Management**: Timeout and error handling for `gh` CLI calls
+- ✅ **Linear graph** - Architect → Refiner → Publisher  
+- ✅ **Idempotent issue creation** - Won't duplicate existing issues
+- ✅ **GitHub project management** - Automatic creation and issue assignment
+- ✅ **Full error tracking** - Continues on partial failures  
+- ✅ **JSON parsing** - Handles Gemini markdown code block responses  
+- ✅ **Subprocess management** - Timeouts & error handling for `gh` CLI calls  
+- ✅ **Cross-platform** - Works on Windows, macOS, Linux

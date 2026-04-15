@@ -174,14 +174,131 @@ Return the refined issues as valid JSON array:"""
 
 
 # ============================================================================
+# HELPER FUNCTIONS FOR PROJECT & ISSUE MANAGEMENT
+# ============================================================================
+
+def get_or_create_project(project_title: str = "em-assignment Backlog") -> str | None:
+    """
+    Get existing project or create a new one.
+    Returns project number (for use with gh CLI) or None if failed.
+    """
+    print(f"\n📋 Checking for project: {project_title}")
+
+    try:
+        # List existing projects
+        result = subprocess.run(
+            "gh project list --format json",
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        if result.returncode == 0:
+            try:
+                projects = json.loads(result.stdout)
+                # Find project by title
+                for project in projects:
+                    if project.get("title") == project_title:
+                        project_num = project.get("number")
+                        print(f"✅ Found existing project: #{project_num} ({project_title})")
+                        return str(project_num)
+            except json.JSONDecodeError:
+                pass
+
+        # Project doesn't exist, create it
+        print(f"📝 Creating new project: {project_title}")
+        create_result = subprocess.run(
+            f'gh project create --title "{project_title}" --format json',
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        if create_result.returncode == 0:
+            try:
+                created_project = json.loads(create_result.stdout)
+                project_num = created_project.get("number")
+                print(f"✅ Created new project: #{project_num}")
+                return str(project_num)
+            except json.JSONDecodeError:
+                pass
+
+        return None
+
+    except Exception as e:
+        print(f"⚠️  Could not manage project: {str(e)}")
+        return None
+
+
+def issue_exists(title: str) -> int | None:
+    """
+    Check if an issue with the given title already exists.
+    Returns issue number if found, None otherwise.
+    """
+    try:
+        # Search for issue by title
+        title_escaped = json.dumps(title)
+        result = subprocess.run(
+            f"gh issue list --search {title_escaped} --state all --format json",
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        if result.returncode == 0:
+            try:
+                issues = json.loads(result.stdout)
+                for issue in issues:
+                    if issue.get("title") == title:
+                        return issue.get("number")
+            except json.JSONDecodeError:
+                pass
+
+        return None
+
+    except Exception as e:
+        print(f"⚠️  Error checking issue existence: {str(e)}")
+        return None
+
+
+def add_issue_to_project(issue_number: int, project_number: str) -> bool:
+    """
+    Add an issue to a project.
+    Returns True if successful, False otherwise.
+    """
+    try:
+        result = subprocess.run(
+            f"gh project item-add {project_number} --issue {issue_number}",
+            shell=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+
+        if result.returncode == 0:
+            print(f"  📌 Added to project: #{issue_number}")
+            return True
+        else:
+            print(f"  ⚠️  Could not add to project: {result.stderr}")
+            return False
+
+    except Exception as e:
+        print(f"  ⚠️  Error adding to project: {str(e)}")
+        return False
+
+
+# ============================================================================
 # NODE 3: THE PUBLISHER
 # ============================================================================
 
 def publisher_node(state: BacklogState) -> BacklogState:
     """
-    Node 3: Use gh CLI to create issues on GitHub
+    Node 3: Use gh CLI to create issues on GitHub and add them to a project
     """
-    print("\n📤 THE PUBLISHER: Creating GitHub issues...")
+    print("\n📤 THE PUBLISHER: Managing GitHub issues and project...")
 
     if not state["refined_issues"]:
         print("❌ No refined issues to publish")
@@ -207,7 +324,15 @@ def publisher_node(state: BacklogState) -> BacklogState:
         state["errors"].append(error_msg)
         return state
 
+    # Create or get project
+    project_number = get_or_create_project()
+    if not project_number:
+        warning_msg = "Could not create/find project, issues will be created without project assignment"
+        print(f"⚠️  {warning_msg}")
+        state["errors"].append(warning_msg)
+
     published_numbers = []
+    skipped_numbers = []
 
     for i, issue in enumerate(state["refined_issues"], 1):
         title = issue.get("title", "").strip()
@@ -219,9 +344,18 @@ def publisher_node(state: BacklogState) -> BacklogState:
             state["errors"].append(error_msg)
             continue
 
+        # Check if issue already exists (idempotency)
+        existing_issue_num = issue_exists(title)
+        if existing_issue_num:
+            print(f"⏭️  Issue already exists (idempotent): #{existing_issue_num} - {title}")
+            skipped_numbers.append(existing_issue_num)
+            # Try to add to project if not already there
+            if project_number:
+                add_issue_to_project(existing_issue_num, project_number)
+            continue
+
         try:
-            # Use gh CLI to create the issue (shell=True needed for Windows compatibility)
-            # Escape quotes and special characters using json.dumps
+            # Create new issue
             title_escaped = json.dumps(title)
             body_escaped = json.dumps(body)
             cmd = f"gh issue create --title {title_escaped} --body {body_escaped}"
@@ -247,6 +381,10 @@ def publisher_node(state: BacklogState) -> BacklogState:
                 issue_number = int(issue_num_str)
                 published_numbers.append(issue_number)
                 print(f"✅ Created issue #{issue_number}: {title}")
+
+                # Add to project
+                if project_number:
+                    add_issue_to_project(issue_number, project_number)
             else:
                 print(f"⚠️  Issue created but couldn't parse number: {output}")
 
@@ -260,7 +398,9 @@ def publisher_node(state: BacklogState) -> BacklogState:
             state["errors"].append(error_msg)
 
     state["published_issue_numbers"] = published_numbers
-    print(f"\n✅ Published {len(published_numbers)} issues")
+    print(f"\n✅ Created {len(published_numbers)} new issues")
+    print(f"⏭️  Skipped {len(skipped_numbers)} existing issues (idempotent)")
+    print(f"📊 Total issues involved: {len(published_numbers) + len(skipped_numbers)}")
 
     return state
 
